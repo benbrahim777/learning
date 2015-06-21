@@ -1,0 +1,105 @@
+---
+title: "Machine Learning"
+author: "Samuel Sam"
+date: "Sunday, June 21, 2015"
+output: html_document
+---
+
+## 1.Backgroud [1]
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+
+## 2. Data
+### Data Downlod
+
+Our training data is downloaded from https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv whereas test data is downloaded from https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+```{r}
+url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+f <- file.path(getwd(), "pml-training.csv")
+download.file(url, f)
+trainData <- data.table(read.csv(f))
+
+
+url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+f <- file.path(getwd(), "pml-testing.csv")
+download.file(url, f)
+testdata <- data.table(read.csv(f))
+
+
+
+```
+
+These datasets may have missing data; thus, we may use the function "FindBlank" to clean them.This training data has 19622 observations and 160 features (see below).
+```{r}
+
+dim(trainData)
+```
+
+
+### Data processing
+
+We then look to validate the training dataset with a validation set as follows: 
+```{r}
+library(caret)
+set.seed(100000)
+trainDataset <- createDataPartition(trainData$classe, p = 0.75, list = FALSE)
+Training <- trainData[trainset, ]
+validation <- trainData[-trainset, ]
+```
+
+
+
+
+### Data Feature selection
+To have clean data, we need to clean columns with missing values, descriptive fields, etc.
+```{r}
+# exclude near zero variance 
+nzvcol <- nearzerovar(Training) 
+Training <- Training[, -nzvcol]
+
+cntlength <- sapply(Trainin????, function(x) {
+sum(!(is.na(x) I x == " ))
+})
+```
+
+```{r}
+nullcol <- names(cntlength[cntlength < 0.6 * length(Trainina$classe)])
+descriptcol <- c("X", "user_name", "raw_timestamp_part_l", "raw_timestamp_part_2",
+"cvtd_timestamp", "new_window", "num_window")
+excludecols <- c(descriptcol, nullcol)
+Training <- Training[, !names(Training) %in% excludecols]
+```
+
+# Training Model
+We use randomForest to classify and do regression as following
+```{r}
+library(randomForest)
+```
+
+```{r}
+rfModel <- randomForest(classe . , data = Training, importance = TRUE, ntrees = 10)
+```
+
+
+# Model Validation
+to verify the model performance, we use the predict function (see below).As our model performs  .
+
+```{r}
+ptraining <- predict(rfModel, Training)
+print(confusionMatrix(ptraining, Training$classe))
+```
+
+
+# Validation set accuracy
+
+As our model performs good, we do more validation tests (see below).
+```{r}
+pvalidation <- predict(rfModel, validation)
+print(confusionMatrix(pvalidation, validation$classe))
+```
+
+# Test set 
+Results of our prediction of our algorithm for the test set are:
+```{r}
+ptest <- predict(rfModel, test)
+ptest
+```
